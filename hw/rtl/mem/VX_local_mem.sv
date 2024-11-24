@@ -36,7 +36,12 @@ module VX_local_mem import VX_gpu_pkg::*; #(
     parameter TAG_WIDTH         = 16,
 
     // Response buffer
-    parameter OUT_BUF           = 0
+    parameter OUT_BUF           = 0,
+
+    //VLEN
+    `ifdef VECTOR_ENABLE
+        parameter VLEN = `VLEN_ARCH
+    `endif
  ) (
     input wire clk,
     input wire reset,
@@ -51,9 +56,14 @@ module VX_local_mem import VX_gpu_pkg::*; #(
     `UNUSED_SPARAM (INSTANCE_ID)
     `UNUSED_PARAM (UUID_WIDTH)
 
+    `ifdef VECTOR_ENABLE
+        localparam WORD_WIDTH      = WORD_SIZE * 8 + VLEN;
+    `else
+        localparam WORD_WIDTH      = WORD_SIZE * 8;
+    `endif
+
     localparam REQ_SEL_BITS    = `CLOG2(NUM_REQS);
     localparam REQ_SEL_WIDTH   = `UP(REQ_SEL_BITS);
-    localparam WORD_WIDTH      = WORD_SIZE * 8;
     localparam NUM_WORDS       = SIZE / WORD_SIZE;
     localparam WORDS_PER_BANK  = NUM_WORDS / NUM_BANKS;
     localparam BANK_ADDR_WIDTH = `CLOG2(WORDS_PER_BANK);
@@ -111,6 +121,9 @@ module VX_local_mem import VX_gpu_pkg::*; #(
             req_bank_addr[i],
             mem_bus_if[i].req_data.byteen,
             mem_bus_if[i].req_data.data,
+            `ifdef VECTOR_ENABLE
+                mem_bus_if[i].req_data.vdata,
+            `endif
             mem_bus_if[i].req_data.tag
         };
         assign mem_bus_if[i].req_ready = req_ready_in[i];

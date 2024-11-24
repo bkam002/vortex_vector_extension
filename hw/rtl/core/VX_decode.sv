@@ -51,7 +51,7 @@ module VX_decode import VX_gpu_pkg::*; #(
     reg [`INST_OP_BITS-1:0] op_type;
     op_args_t op_args;
     reg [`NR_BITS-1:0] rd_v, rs1_v, rs2_v, rs3_v;
-    reg use_rd, use_rs1, use_rs2, use_rs3;
+    reg use_rd, use_rs1, use_rs2, use_rs3, use_imm;
     reg is_wstall;
 
     wire [31:0] instr = fetch_if.data.instr;
@@ -60,7 +60,9 @@ module VX_decode import VX_gpu_pkg::*; #(
     wire [2:0] func3  = instr[14:12];
     wire [4:0] func5  = instr[31:27];
     wire [6:0] func7  = instr[31:25];
+    wire [5:0]  func6 = instr[31:26];
     wire [11:0] u_12  = instr[31:20];
+    wire          vm  = instr[25];
 
     wire [4:0] rd  = instr[11:7];
     wire [4:0] rs1 = instr[19:15];
@@ -160,10 +162,12 @@ module VX_decode import VX_gpu_pkg::*; #(
         rs2_v     = '0;
         rs3_v     = '0;
         use_rd    = 0;
+        use_imm   = 0;
         use_rs1   = 0;
         use_rs2   = 0;
         use_rs3   = 0;
         is_wstall = 0;
+        use_vec_type = 'x;
 
         case (opcode)
             `INST_I: begin
@@ -528,6 +532,137 @@ module VX_decode import VX_gpu_pkg::*; #(
                             end
                             default:;
                         endcase
+                    end
+                    default:;
+                endcase
+            end
+        `ifdef EXT_V_ENABLE
+            `INST_V: begin  // Vector Instructions (Other than vector load/store)
+                ex_type = `EX_VPU;
+                // op_type = `INST_OP_BITS'(func6);
+                case(func3)
+                    3'h0: begin  // OPIVV
+                        case(func6)
+                            6'h0:  op_type = `INST_OP_BITS'(`INST_VPU_VADD);
+                            6'h2:  op_type = `INST_OP_BITS'(`INST_VPU_VSUB);
+                            6'h4:  op_type = `INST_OP_BITS'(`INST_VPU_VMINU);
+                            6'h5:  op_type = `INST_OP_BITS'(`INST_VPU_VMIN);
+                            6'h6:  op_type = `INST_OP_BITS'(`INST_VPU_VMAXU);
+                            6'h7:  op_type = `INST_OP_BITS'(`INST_VPU_VMAX);
+                            6'h9:  op_type = `INST_OP_BITS'(`INST_ALU_AND);
+                            6'h10: op_type = `INST_OP_BITS'(`INST_ALU_OR);
+                            6'h11: op_type = `INST_OP_BITS'(`INST_ALU_XOR);
+                            6'h24: op_type = `INST_OP_BITS'(`INST_VPU_VMSEQ);
+                            6'h25: op_type = `INST_OP_BITS'(`INST_VPU_VMSNE);
+                            6'h26: op_type = `INST_OP_BITS'(`INST_ALU_SLTU);
+                            6'h27: op_type = `INST_OP_BITS'(`INST_ALU_SLT);
+                            6'h28: op_type = `INST_OP_BITS'(`INST_VPU_VMSLEU);
+                            6'h29: op_type = `INST_OP_BITS'(`INST_VPU_VMSLE);
+                            6'h30: op_type = `INST_OP_BITS'(`INST_VPU_VMSGTU);
+                            6'h31: op_type = `INST_OP_BITS'(`INST_VPU_VMSGT);
+                            default:;
+                        endcase
+                        use_vec_type = 2'b0; // VV type
+                        use_rd  = 1;
+                        `USED_IREG (rd);
+                        `USED_IREG (rs1);
+                        `USED_IREG (rs2);
+                    end
+                    3'h1: begin  // OPFVV
+                        case(func6)
+                            6'h0:  op_type = `INST_OP_BITS'(`INST_FPU_ADD);
+                            6'h28: op_type = `INST_OP_BITS'(`INST_VPU_VMFNE);
+                            6'h44: op_type = `INST_OP_BITS'(`INST_VPU_VFMACC);
+                            default:;
+                        endcase
+                        use_vec_type = 2'b0; // VV type
+                        use_rd  = 1;
+                        `USED_IREG (rd);
+                        `USED_IREG (rs1);
+                        `USED_IREG (rs2);
+                    end
+                    3'h2: begin  // OPMVV
+                        case(func6)
+                            6'h0:  op_type = `INST_OP_BITS'(`INST_VPU_VREDSUM);
+                            6'h16: op_type = `INST_OP_BITS'(`INST_VPU_VMV_XS);
+                            6'h24: op_type = `INST_OP_BITS'(`INST_VPU_VMANDNOT);
+                            6'h28: op_type = `INST_OP_BITS'(`INST_VPU_VMORNOT);
+                            6'h29: op_type = `INST_OP_BITS'(`INST_VPU_VMNAND);
+                            6'h30: op_type = `INST_OP_BITS'(`INST_VPU_VMNOR);
+                            6'h31: op_type = `INST_OP_BITS'(`INST_VPU_VMXNOR);
+                            6'h45: op_type = `INST_OP_BITS'(`INST_VPU_VMACC);
+                            default:;
+                        endcase
+                        use_vec_type = 2'b0; // VV type
+                        use_rd  = 1;
+                        `USED_IREG (rd);
+                        `USED_IREG (rs1);
+                        `USED_IREG (rs2);
+                    end
+                    3'h3: begin  // OPIVI
+                        case(func6)
+                            6'h0:  op_type = `INST_OP_BITS'(`INST_VPU_ADDI);
+                            6'h3:  op_type = `INST_OP_BITS'(`INST_VPU_VRSUB);
+                            6'h9:  op_type = `INST_OP_BITS'(`INST_ALU_AND);
+                            6'h10: op_type = `INST_OP_BITS'(`INST_ALU_OR);
+                            6'h11: op_type = `INST_OP_BITS'(`INST_ALU_XOR);
+                            6'h23: op_type = `INST_OP_BITS'(`INST_VPU_VMV_VI);    // vmv.v.i & vmerge.vim
+                            6'h39: op_type = `INST_OP_BITS'(`INST_VPU_VMV1R);
+                            default:;
+                        endcase
+                        use_vec_type = 2'b10; // VI type
+                        use_imm = 1;
+                        imm = `XLEN'(rs1);
+                        use_rd  = 1;
+                        `USED_IREG (rd);
+                        // `USED_IREG (rs1);
+                        `USED_IREG (rs2);
+                    end
+                    3'h4: begin  // OPIVX
+                        case(func6)
+                            6'h0:  op_type = `INST_OP_BITS'(`INST_VPU_VADD);
+                            6'h3:  op_type = `INST_OP_BITS'(`INST_VPU_VRSUB);
+                            6'h4:  op_type = `INST_OP_BITS'(`INST_VPU_VMINU);
+                            6'h5:  op_type = `INST_OP_BITS'(`INST_VPU_VMIN);
+                            6'h6:  op_type = `INST_OP_BITS'(`INST_VPU_VMAXU);
+                            6'h7:  op_type = `INST_OP_BITS'(`INST_VPU_VMAX);
+                            6'h9:  op_type = `INST_OP_BITS'(`INST_ALU_AND);
+                            6'h10: op_type = `INST_OP_BITS'(`INST_ALU_OR);
+                            6'h11: op_type = `INST_OP_BITS'(`INST_ALU_XOR);
+                            default:;
+                        endcase
+                        opt_args.vpu.vec_type = 2'b01; // VX type
+                        use_rd  = 1;
+                        `USED_IREG (rd);
+                        `USED_IREG (rs1);
+                        `USED_IREG (rs2);
+                    end
+                    3'h5: begin  // OPFVF
+                        case(func6)
+                            6'h0:  op_type = `INST_OP_BITS'(`INST_FPU_ADD);
+                            6'h23: op_type = vm ? `INST_OP_BITS'(`INST_VPU_VFMV) : `INST_OP_BITS'(`INST_VPU_VFMERGE);
+                            6'h39: op_type = `INST_OP_BITS'(`INST_VPU_VFRSUB);
+                            default:;
+                        endcase
+                        use_vec_type = 2'b01; // VX type
+                        use_rd  = 1;
+                        `USED_IREG (rd);
+                        `USED_IREG (rs1);
+                        `USED_IREG (rs2);
+                    end
+                    3'b110: begin  // OPMVX
+                        case(func6)
+                            6'h0:  op_type = `INST_OP_BITS'(`INST_FPU_ADD);
+                            6'h14: op_type = `INST_OP_BITS'(`INST_VPU_VSLIDE1UP);
+                            6'h15: op_type = `INST_OP_BITS'(`INST_VPU_VSLIDE1DOWN);
+                            6'h16: op_type = `INST_OP_BITS'(`INST_VPU_VMV_SX);
+                            default:;
+                        endcase
+                        use_vec_type = 2'b01; // VX type
+                        use_rd  = 1;
+                        `USED_IREG (rd);
+                        `USED_IREG (rs1);
+                        `USED_IREG (rs2);
                     end
                     default:;
                 endcase

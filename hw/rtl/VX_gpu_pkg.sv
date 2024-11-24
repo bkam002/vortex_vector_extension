@@ -127,12 +127,20 @@ package VX_gpu_pkg;
         logic is_neg;
     } wctl_args_t;
 
+    typedef struct packed {
+        logic [($bits(alu_args_t)-`VEC_TYPE_BITS+`XLEN+1)-1:0] __padding;
+        logic [`VEC_TYPE_BITS-1:0] vec_type;
+        logic [`XLEN-1:0]          imm;
+        logic                      use_imm;
+    } vpu_args_t;
+
     typedef union packed {
         alu_args_t  alu;
         fpu_args_t  fpu;
         lsu_args_t  lsu;
         csr_args_t  csr;
         wctl_args_t wctl;
+        vpu_args_t  vpu;
     } op_args_t;
 
 `IGNORE_UNUSED_BEGIN
@@ -323,6 +331,9 @@ package VX_gpu_pkg;
             `EX_SFU: `TRACE(level, ("SFU"))
         `ifdef EXT_F_ENABLE
             `EX_FPU: `TRACE(level, ("FPU"))
+        `endif
+        `ifdef VECTOR_ENABLE
+            `EX_VPU: `TRACE(level, ("VPU"))
         `endif
             default: `TRACE(level, ("?"))
         endcase
@@ -687,6 +698,11 @@ package VX_gpu_pkg;
                 end
                 default: `TRACE(level, ("?"))
             endcase
+        end
+    `endif
+    `ifdef VECTOR_ENABLE
+        `EX_VPU: begin
+            `TRACE(level, ("VPU"));
         end
     `endif
         default: `TRACE(level, ("?"))

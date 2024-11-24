@@ -19,7 +19,10 @@ module VX_pe_switch import VX_gpu_pkg::*; #(
     parameter REQ_OUT_BUF     = 0,
     parameter RSP_OUT_BUF     = 0,
     parameter `STRING ARBITER = "R",
-    parameter PE_SEL_BITS = `CLOG2(PE_COUNT)
+    parameter PE_SEL_BITS = `CLOG2(PE_COUNT),
+    `ifdef VECTOR_ENABLE
+        parameter VLEN = `VLEN_ARCH
+    `endif
 ) (
     input wire          clk,
     input wire          reset,
@@ -32,7 +35,13 @@ module VX_pe_switch import VX_gpu_pkg::*; #(
     localparam PID_BITS    = `CLOG2(`NUM_THREADS / NUM_LANES);
     localparam PID_WIDTH   = `UP(PID_BITS);
     localparam REQ_DATAW   = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + `INST_ALU_BITS + $bits(op_args_t) + 1 + `NR_BITS + `NT_WIDTH + (3 * NUM_LANES * `XLEN) + PID_WIDTH + 1 + 1;
-    localparam RSP_DATAW   = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + `NR_BITS + 1 + NUM_LANES * `XLEN + PID_WIDTH + 1 + 1;
+    
+    `ifdef VECTOR_ENABLE
+        localparam RSP_DATAW        = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + 1 + `NR_BITS + NUM_LANES * `XLEN + 1 + `NUM_THREADS * `VLEN_ARCH + `NUM_THREADS * VLEN + 
+ PID_WIDTH + 1 + 1;
+    `else
+        localparam RSP_DATAW        = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + 1 + `NR_BITS + NUM_LANES * `XLEN + PID_WIDTH + 1 + 1;
+    `endif
 
     wire [PE_COUNT-1:0] pe_req_valid;
     wire [PE_COUNT-1:0][REQ_DATAW-1:0] pe_req_data;

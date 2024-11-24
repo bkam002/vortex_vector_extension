@@ -73,8 +73,9 @@
 `define EX_LSU          1
 `define EX_SFU          2
 `define EX_FPU          (`EX_SFU + `EXT_F_ENABLED)
+`define EX_VPU          (`EX_FPU + `EXT_V_ENABLE)
 
-`define NUM_EX_UNITS    (3 + `EXT_F_ENABLED)
+`define NUM_EX_UNITS    (3 + `EXT_F_ENABLED + `EXT_V_ENABLE)
 `define EX_BITS         `CLOG2(`NUM_EX_UNITS)
 `define EX_WIDTH        `UP(`EX_BITS)
 
@@ -110,6 +111,65 @@
 `define INST_FNMSUB     7'b1001011
 `define INST_FNMADD     7'b1001111
 `define INST_FCI        7'b1010011 // float common instructions
+
+///////////////////////////////////////////////////////////////////////////////
+
+// Vector Extension Configuration and Arithemetic Instruction Opcodes
+`define INST_V          7'b1010111
+`define VM_BITS         1
+`define VEC_TYPE_BITS   2 
+
+`define VEC_TYPE_VV     0
+`define VEC_TYPE_VI     1
+`define VEC_TYPE_VX     2
+
+`define VLMAX_SEW08_LMUL1 `VLEN_ARCH/8
+`define VLMAX_SEW16_LMUL1 `VLEN_ARCH/16
+`define VLMAX_SEW32_LMUL1 `VLEN_ARCH/32
+`define VLMAX_SEW64_LMUL1 `VLEN_ARCH/64
+`define VEC_IMM_BITS 15
+
+//Vector Configuration Instructions
+`define INST_VPU_VSETVL      5'b10111
+`define INST_VPU_VSETVLI     5'b10110
+`define INST_VPU_VSETIVLI    5'b11110
+`define INST_VPU_BITS        6
+
+//Vector Arithmetic Instructions
+`define INST_VPU_VADD        6'b100000
+`define INST_VPU_VSUB        6'b111111
+`define INST_VPU_VMINU       6'b111110
+`define INST_VPU_VMIN        6'b100001
+`define INST_VPU_VMAXU       6'b100010
+`define INST_VPU_VMAX        6'b100011
+`define INST_VPU_VMSEQ       6'b100100
+`define INST_VPU_VMSNE       6'b100101
+`define INST_VPU_VMSLEU      6'b100110
+`define INST_VPU_VMSLE       6'b100111
+`define INST_VPU_VMFNE       6'b101000
+`define INST_VPU_VFMACC      6'b101001
+`define INST_VPU_VREDSUM     6'b101010
+`define INST_VPU_VMV_XS      6'b101011
+`define INST_VPU_VMV_VI      6'b101100
+`define INST_VPU_VMANDNOT    6'b101101
+`define INST_VPU_VMORNOT     6'b101110
+`define INST_VPU_VMNAND      6'b101111
+`define INST_VPU_VMNOR       6'b110000
+`define INST_VPU_VMXNOR      6'b110001
+`define INST_VPU_VMACC       6'b110010
+`define INST_VPU_ADDI        6'b110011
+`define INST_VPU_VMV1R       6'b110100
+`define INST_VPU_VRSUB       6'b110101
+`define INST_VPU_VFMV        6'b110110
+`define INST_VPU_VFMERGE     6'b110111
+`define INST_VPU_VMSGTU      6'b111000
+`define INST_VPU_VMSGT       6'b111001
+`define INST_VPU_VFRSUB      6'b111010
+`define INST_VPU_VSLIDE1UP   6'b111011
+`define INST_VPU_VSLIDE1DOWN 6'b111100
+`define INST_VPU_VMV_SX      6'b111101
+
+///////////////////////////////////////////////////////////////////////////////
 
 // Custom extension opcodes
 `define INST_EXT1       7'b0001011 // 0x0B

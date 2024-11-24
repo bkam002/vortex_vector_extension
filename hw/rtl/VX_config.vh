@@ -87,6 +87,15 @@
 `endif
 `endif
 
+`define VLEN_ARCH 256 // This is the length of a vector register in bits
+`define ELEN XLEN // This is the maximum size of an element in the vector register (8 ≤ ELEN ≤ VLEN)
+`define VLEN_ARCH_BYTES `VLEN_ARCH/8
+
+// Enable Vector Extension by default
+`ifndef EXT_V_DISABLE
+`define EXT_V_ENABLE
+`endif
+
 `ifndef NUM_CLUSTERS
 `define NUM_CLUSTERS 1
 `endif

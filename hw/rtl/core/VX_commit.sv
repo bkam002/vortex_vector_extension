@@ -14,7 +14,10 @@
 `include "VX_define.vh"
 
 module VX_commit import VX_gpu_pkg::*; #(
-    parameter `STRING INSTANCE_ID = ""
+    parameter `STRING INSTANCE_ID = "",
+    `ifdef VECTOR_ENABLE
+        parameter VLEN = `VLEN_ARCH
+    `endif
 ) (
     input wire              clk,
     input wire              reset,
@@ -28,7 +31,11 @@ module VX_commit import VX_gpu_pkg::*; #(
     VX_commit_sched_if.master commit_sched_if
 );
     `UNUSED_SPARAM (INSTANCE_ID)
-    localparam DATAW = `UUID_WIDTH + `NW_WIDTH + `NUM_THREADS + `PC_BITS + 1 + `NR_BITS + `NUM_THREADS * `XLEN + 1 + 1 + 1;
+    `ifdef VECTOR_ENABLE
+        localparam DATAW = `UUID_WIDTH + `NW_WIDTH + `NUM_THREADS + `PC_BITS + 1 + `NR_BITS + `NUM_THREADS * `XLEN + 1 + 1 + 1 + 1 + `NUM_THREADS * `VLEN_ARCH + `NUM_THREADS * VLEN;
+    `else
+        localparam DATAW = `UUID_WIDTH + `NW_WIDTH + `NUM_THREADS + `PC_BITS + 1 + `NR_BITS + `NUM_THREADS * `XLEN + 1 + 1 + 1;
+    `endif
     localparam COMMIT_SIZEW = `CLOG2(`NUM_THREADS + 1);
     localparam COMMIT_ALL_SIZEW = COMMIT_SIZEW + `ISSUE_WIDTH - 1;
 

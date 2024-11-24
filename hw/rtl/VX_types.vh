@@ -188,6 +188,17 @@
 `define VX_CSR_MIMPID                   12'hF13
 `define VX_CSR_MHARTID                  12'hF14
 
+// Vector Extension - Vector Configuration Registers - For single thread - as of now global for across warp.
+`define VX_CSR_VE_BEGIN                12'hD00
+`define VX_CSR_VSTART                  (`VX_CSR_VE_BEGIN+0)
+`define VX_CSR_VXSAT                   (`VX_CSR_VE_BEGIN+1)
+`define VX_CSR_VXRM                    (`VX_CSR_VE_BEGIN+2)
+`define VX_CSR_VCSR                    (`VX_CSR_VE_BEGIN+3)
+`define VX_CSR_VL                      (`VX_CSR_VE_BEGIN+4)
+`define VX_CSR_VTYPE                   (`VX_CSR_VE_BEGIN+5)
+`define VX_CSR_VLENB                   12'hC22
+`define VX_CSR_VE_END                  (`VX_CSR_VE_BEGIN+7)
+
 // GPGU CSRs
 
 `define VX_CSR_THREAD_ID                12'hCC0

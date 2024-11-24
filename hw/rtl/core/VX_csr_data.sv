@@ -77,6 +77,16 @@ import VX_fpu_pkg::*;
 
     reg [`XLEN-1:0] mscratch;
 
+    `ifdef VECTOR_ENABLE
+    reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vstart;
+    reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vxsat;
+    reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vxrm; 
+    reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vcsr;
+    reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vl;   
+    reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vtype;
+    reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vlenb;
+    `endif
+
 `ifdef EXT_F_ENABLE
     reg [`NUM_WARPS-1:0][`INST_FRM_BITS+`FP_FLAGS_BITS-1:0] fcsr, fcsr_n;
     wire [`NUM_FPU_BLOCKS-1:0]              fpu_write_enable;
@@ -146,6 +156,16 @@ import VX_fpu_pkg::*;
                 `VX_CSR_MSCRATCH: begin
                     mscratch <= write_data;
                 end
+                //Vector CSR write
+                `ifdef VECTOR_ENABLE
+                    `VX_CSR_VSTART:   csr_vstart[write_wid]   <= write_data;
+                    `VX_CSR_VXSAT:    csr_vxsat[write_wid]    <= write_data;
+                    `VX_CSR_VXRM:     csr_vxrm[write_wid]     <= write_data;
+                    `VX_CSR_VCSR:     csr_vcsr[write_wid]     <= write_data;
+                    `VX_CSR_VL:       csr_vl[write_wid]       <= write_data;
+                    `VX_CSR_VTYPE:    csr_vtype[write_wid]    <= write_data;
+                    `VX_CSR_VLENB:    csr_vlenb[write_wid]    <= write_data;
+                `endif
                 default: begin
                     `ASSERT(0, ("%t: *** %s invalid CSR write address: %0h (#%0d)", $time, INSTANCE_ID, write_addr, write_uuid));
                 end
@@ -201,7 +221,15 @@ import VX_fpu_pkg::*;
             `VX_CSR_MEPC,
             `VX_CSR_PMPCFG0,
             `VX_CSR_PMPADDR0 : read_data_ro_w = `XLEN'(0);
-
+            `ifdef VECTOR_ENABLE
+                `VX_CSR_VSTART     : read_data_ro_w = csr_vstart[read_wid];
+                `VX_CSR_VXSAT      : read_data_ro_w = csr_vxsat[read_wid];  
+                `VX_CSR_VXRM       : read_data_ro_w = csr_vxrm[read_wid];  
+                `VX_CSR_VCSR       : read_data_ro_w = csr_vcsr[read_wid];  
+                `VX_CSR_VL         : read_data_ro_w = csr_vl[read_wid];  
+                `VX_CSR_VTYPE      : read_data_ro_w = csr_vtype[read_wid];  
+                `VX_CSR_VLENB      : read_data_ro_w = csr_vlenb[read_wid];  
+            `endif
             default: begin
                 read_addr_valid_w = 0;
                 if ((read_addr >= `VX_CSR_MPM_USER   && read_addr < (`VX_CSR_MPM_USER + 32))
