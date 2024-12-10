@@ -24,6 +24,10 @@ interface VX_writeback_if import VX_gpu_pkg::*; ();
         logic [`NUM_THREADS-1:0][`XLEN-1:0] data;
         logic                           sop;
         logic                           eop;
+    `ifdef EXT_V_ENABLE
+        logic                           is_vec;
+        logic [`NR_BITS-1:0]            vd;
+        logic [`NR_BITS-1:0]            lane_id;
     } data_t;
 
     logic  valid;

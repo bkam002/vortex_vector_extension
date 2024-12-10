@@ -28,6 +28,12 @@ interface VX_dispatch_if import VX_gpu_pkg::*; ();
         logic [`NUM_THREADS-1:0][`XLEN-1:0] rs1_data;
         logic [`NUM_THREADS-1:0][`XLEN-1:0] rs2_data;
         logic [`NUM_THREADS-1:0][`XLEN-1:0] rs3_data;
+    `ifdef EXT_V_ENABLE
+        logic                               is_vec;
+        logic [`NR_BITS-1:0]                vd;
+        logic [`NR_BITS-1:0]                vd_lane_id;
+        logic                               vd_is_last;
+    `endif
     } data_t;
 
     logic  valid;

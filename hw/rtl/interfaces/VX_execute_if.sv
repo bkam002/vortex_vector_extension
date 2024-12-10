@@ -33,6 +33,12 @@ interface VX_execute_if import VX_gpu_pkg::*; #(
         logic [PID_WIDTH-1:0]           pid;
         logic                           sop;
         logic                           eop;
+    `ifdef EXT_V_ENABLE
+        logic                               is_vec;
+        logic [`NR_BITS-1:0]                vd;
+        logic [`NR_BITS-1:0]                vd_lane_id;
+        logic                               vd_is_last;
+    `endif
     } data_t;
 
     logic  valid;
