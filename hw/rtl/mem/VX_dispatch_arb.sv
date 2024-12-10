@@ -14,7 +14,7 @@
 `include "VX_define.vh"
 
 module VX_dispatch_arb #(
-    parameter NUM_REQS = 1,
+    parameter NUM_REQS = 2,
     parameter OUT_BUF  = 0,
     parameter `STRING ARBITER = "R"
 ) (

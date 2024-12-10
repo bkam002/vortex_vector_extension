@@ -15,7 +15,7 @@
 
 module VX_commit import VX_gpu_pkg::*; #(
     parameter `STRING INSTANCE_ID = "",
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         parameter VLEN = `VLEN_ARCH
     `endif
 ) (
@@ -31,7 +31,7 @@ module VX_commit import VX_gpu_pkg::*; #(
     VX_commit_sched_if.master commit_sched_if
 );
     `UNUSED_SPARAM (INSTANCE_ID)
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         localparam DATAW = `UUID_WIDTH + `NW_WIDTH + `NUM_THREADS + `PC_BITS + 1 + `NR_BITS + `NUM_THREADS * `XLEN + 1 + 1 + 1 + 1 + `NUM_THREADS * `VLEN_ARCH + `NUM_THREADS * VLEN;
     `else
         localparam DATAW = `UUID_WIDTH + `NW_WIDTH + `NUM_THREADS + `PC_BITS + 1 + `NR_BITS + `NUM_THREADS * `XLEN + 1 + 1 + 1;

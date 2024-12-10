@@ -74,6 +74,21 @@ module VX_execute import VX_gpu_pkg::*; #(
         .lsu_mem_if     (lsu_mem_if)
     );
 
+// `ifdef EXT_V_ENABLE
+//     VX_dispatch_if vpu_alu_dispatch_if [`ISSUE_WIDTH]();
+//     VX_dispatch_if vpu_lsu_dispatch_if [`ISSUE_WIDTH]();
+
+//     VX_vpu_unit #(
+//         .INSTANCE_ID (`SFORMATF(("%s-vpu", INSTANCE_ID)))
+//     ) vpu_unit (
+//         .clk            (clk),
+//         .reset          (reset),
+//         .dispatch_if    (dispatch_if[`EX_VPU * `ISSUE_WIDTH +: `ISSUE_WIDTH]),
+//         .alu_dispatch_if(vpu_alu_dispatch_if),
+//         .lsu_dispatch_if(vpu_alu_dispatch_if)
+//     );
+// `endif
+
 `ifdef EXT_F_ENABLE
     VX_fpu_unit #(
         .INSTANCE_ID (`SFORMATF(("%s-fpu", INSTANCE_ID)))

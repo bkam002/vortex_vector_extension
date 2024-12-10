@@ -16,9 +16,9 @@
 interface VX_commit_if #(
     parameter NUM_LANES = `NUM_THREADS,
     parameter PID_WIDTH = `LOG2UP(`NUM_THREADS / NUM_LANES),
-    `ifdef VECTOR_ENABLE
-        parameter VLEN = `VLEN_ARCH
-    `endif
+`ifdef EXT_V_ENABLE
+    parameter VLEN = `VLEN_ARCH
+`endif 
 ) ();
 
     typedef struct packed {
@@ -29,10 +29,10 @@ interface VX_commit_if #(
         logic                       wb;
         logic [`NR_BITS-1:0]        rd;
         logic [NUM_LANES-1:0][`XLEN-1:0] data;
-        `ifdef VECTOR_ENABLE
+        `ifdef EXT_V_ENABLE
             logic                        is_vec;
-            logic [`NUM_THREADS-1:0][`VLEN_ARCH-1:0] vd_data;
-            logic [`NUM_THREADS-1:0][VLEN-1:0] vdata;
+            logic [NUM_LANES-1:0][`VLEN_ARCH-1:0] vd_data;
+            logic [NUM_LANES-1:0][VLEN-1:0] vdata;
         `endif
         logic [PID_WIDTH-1:0]       pid;
         logic                       sop;

@@ -809,6 +809,12 @@
     `define EXT_F_ENABLED   0
 `endif
 
+`ifdef EXT_V_ENABLE
+    `define EXT_V_ENABLED   1
+`else
+    `define EXT_V_ENABLED   0
+`endif
+
 `ifdef EXT_M_ENABLE
     `define EXT_M_ENABLED   1
 `else

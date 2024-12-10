@@ -28,6 +28,12 @@ interface VX_scoreboard_if import VX_gpu_pkg::*; ();
         logic [`NR_BITS-1:0]        rs1;
         logic [`NR_BITS-1:0]        rs2;
         logic [`NR_BITS-1:0]        rs3;
+    `ifdef EXT_V_ENABLE
+        logic [`NR_BITS-1:0]        vd;
+        logic [`NR_BITS-1:0]        vd_n;
+        logic [`NR_BITS-1:0]        vs1_n;
+        logic [`NR_BITS-1:0]        vs2_n;
+    `endif
     } data_t;
 
     logic  valid;

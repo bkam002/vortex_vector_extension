@@ -51,7 +51,7 @@ module VX_decode import VX_gpu_pkg::*; #(
     reg [`INST_OP_BITS-1:0] op_type;
     op_args_t op_args;
     reg [`NR_BITS-1:0] rd_v, rs1_v, rs2_v, rs3_v;
-    reg use_rd, use_rs1, use_rs2, use_rs3, use_imm;
+    reg use_rd, use_rs1, use_rs2, use_rs3;
     reg is_wstall;
 
     wire [31:0] instr = fetch_if.data.instr;
@@ -150,6 +150,9 @@ module VX_decode import VX_gpu_pkg::*; #(
     `STATIC_ASSERT($bits(fpu_args_t)  == $bits(op_args_t), ("fpu_args_t size mismatch: current=%0d, expected=%0d", $bits(fpu_args_t), $bits(op_args_t)));
     `STATIC_ASSERT($bits(lsu_args_t)  == $bits(op_args_t), ("lsu_args_t size mismatch: current=%0d, expected=%0d", $bits(lsu_args_t), $bits(op_args_t)));
     `STATIC_ASSERT($bits(csr_args_t)  == $bits(op_args_t), ("csr_args_t size mismatch: current=%0d, expected=%0d", $bits(csr_args_t), $bits(op_args_t)));
+    `ifdef EXT_V_ENABLE
+        `STATIC_ASSERT($bits(vpu_args_t)  == $bits(op_args_t), ("vpu_args_t size mismatch: current=%0d, expected=%0d", $bits(vpu_args_t), $bits(op_args_t)));
+    `endif
     `STATIC_ASSERT($bits(wctl_args_t) == $bits(op_args_t), ("wctl_args_t size mismatch: current=%0d, expected=%0d", $bits(wctl_args_t), $bits(op_args_t)));
 
     always @(*) begin
@@ -162,12 +165,10 @@ module VX_decode import VX_gpu_pkg::*; #(
         rs2_v     = '0;
         rs3_v     = '0;
         use_rd    = 0;
-        use_imm   = 0;
         use_rs1   = 0;
         use_rs2   = 0;
         use_rs3   = 0;
         is_wstall = 0;
-        use_vec_type = 'x;
 
         case (opcode)
             `INST_I: begin
@@ -562,7 +563,7 @@ module VX_decode import VX_gpu_pkg::*; #(
                             6'h31: op_type = `INST_OP_BITS'(`INST_VPU_VMSGT);
                             default:;
                         endcase
-                        use_vec_type = 2'b0; // VV type
+                        op_args.vpu.vec_type = 2'b0; // VV type
                         use_rd  = 1;
                         `USED_IREG (rd);
                         `USED_IREG (rs1);
@@ -575,7 +576,7 @@ module VX_decode import VX_gpu_pkg::*; #(
                             6'h44: op_type = `INST_OP_BITS'(`INST_VPU_VFMACC);
                             default:;
                         endcase
-                        use_vec_type = 2'b0; // VV type
+                        op_args.vpu.vec_type = 2'b0; // VV type
                         use_rd  = 1;
                         `USED_IREG (rd);
                         `USED_IREG (rs1);
@@ -593,7 +594,7 @@ module VX_decode import VX_gpu_pkg::*; #(
                             6'h45: op_type = `INST_OP_BITS'(`INST_VPU_VMACC);
                             default:;
                         endcase
-                        use_vec_type = 2'b0; // VV type
+                        op_args.vpu.vec_type = 2'b0; // VV type
                         use_rd  = 1;
                         `USED_IREG (rd);
                         `USED_IREG (rs1);
@@ -610,9 +611,9 @@ module VX_decode import VX_gpu_pkg::*; #(
                             6'h39: op_type = `INST_OP_BITS'(`INST_VPU_VMV1R);
                             default:;
                         endcase
-                        use_vec_type = 2'b10; // VI type
-                        use_imm = 1;
-                        imm = `XLEN'(rs1);
+                        op_args.vpu.vec_type = 2'b10; // VI type
+                        op_args.vpu.use_imm = 1;
+                        op_args.vpu.imm = `XLEN'(rs1);
                         use_rd  = 1;
                         `USED_IREG (rd);
                         // `USED_IREG (rs1);
@@ -631,7 +632,7 @@ module VX_decode import VX_gpu_pkg::*; #(
                             6'h11: op_type = `INST_OP_BITS'(`INST_ALU_XOR);
                             default:;
                         endcase
-                        opt_args.vpu.vec_type = 2'b01; // VX type
+                        op_args.vpu.vec_type = 2'b01; // VX type
                         use_rd  = 1;
                         `USED_IREG (rd);
                         `USED_IREG (rs1);
@@ -644,7 +645,7 @@ module VX_decode import VX_gpu_pkg::*; #(
                             6'h39: op_type = `INST_OP_BITS'(`INST_VPU_VFRSUB);
                             default:;
                         endcase
-                        use_vec_type = 2'b01; // VX type
+                        op_args.vpu.vec_type = 2'b01; // VX type
                         use_rd  = 1;
                         `USED_IREG (rd);
                         `USED_IREG (rs1);
@@ -658,7 +659,7 @@ module VX_decode import VX_gpu_pkg::*; #(
                             6'h16: op_type = `INST_OP_BITS'(`INST_VPU_VMV_SX);
                             default:;
                         endcase
-                        use_vec_type = 2'b01; // VX type
+                        op_args.vpu.vec_type = 2'b01; // VX type
                         use_rd  = 1;
                         `USED_IREG (rd);
                         `USED_IREG (rs1);
@@ -667,7 +668,8 @@ module VX_decode import VX_gpu_pkg::*; #(
                     default:;
                 endcase
             end
-            default:;
+        `endif
+        default:;
         endcase
     end
 

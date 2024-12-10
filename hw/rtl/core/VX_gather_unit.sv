@@ -17,7 +17,7 @@ module VX_gather_unit import VX_gpu_pkg::*; #(
     parameter BLOCK_SIZE = 1,
     parameter NUM_LANES  = 1,
     parameter OUT_BUF    = 0,
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         parameter VLEN = `VLEN_ARCH
     `endif
 ) (
@@ -36,7 +36,7 @@ module VX_gather_unit import VX_gpu_pkg::*; #(
     localparam BLOCK_SIZE_W = `LOG2UP(BLOCK_SIZE);
     localparam PID_BITS     = `CLOG2(`NUM_THREADS / NUM_LANES);
     localparam PID_WIDTH    = `UP(PID_BITS);
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         localparam DATAW        = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + 1 + `NR_BITS + NUM_LANES * `XLEN + 1 + `NUM_THREADS * `VLEN_ARCH + `NUM_THREADS * VLEN + 
  PID_WIDTH + 1 + 1;
     `else
@@ -105,7 +105,7 @@ module VX_gather_unit import VX_gpu_pkg::*; #(
 
         logic [`NUM_THREADS-1:0] commit_tmask_w;
         logic [`NUM_THREADS-1:0][`XLEN-1:0] commit_data_w;
-        `ifdef VECTOR_ENABLE
+        `ifdef EXT_V_ENABLE
             logic [`NUM_THREADS-1:0][`VLEN_ARCH-1:0] commit_vd_data_w;
             logic [`NUM_THREADS-1:0][VLEN-1:0] commit_vdata_w;
         `endif
@@ -117,7 +117,7 @@ module VX_gather_unit import VX_gpu_pkg::*; #(
                 for (integer j = 0; j < NUM_LANES; ++j) begin
                     commit_tmask_w[commit_tmp_if.data.pid * NUM_LANES + j] = commit_tmp_if.data.tmask[j];
                     commit_data_w[commit_tmp_if.data.pid * NUM_LANES + j] = commit_tmp_if.data.data[j];
-                    `ifdef VECTOR_ENABLE
+                    `ifdef EXT_V_ENABLE
                         commit_vd_data_w[commit_tmp_if.data.pid * NUM_LANES + j] = commit_tmp_if.data.vd_data[j];
                         commit_vdata_w[commit_tmp_if.data.pid * NUM_LANES + j] = commit_tmp_if.data.vdata[j];
                     `endif
@@ -126,7 +126,7 @@ module VX_gather_unit import VX_gpu_pkg::*; #(
         end else begin : g_commit_data_no_pid
             assign commit_tmask_w = commit_tmp_if.data.tmask;
             assign commit_data_w = commit_tmp_if.data.data;
-            `ifdef VECTOR_ENABLE
+            `ifdef EXT_V_ENABLE
                 assign commit_vd_data_w = commit_tmp_if.data.vd_data;
                 assign commit_vdata_w = commit_tmp_if.data.vdata;
             `endif
@@ -141,7 +141,7 @@ module VX_gather_unit import VX_gpu_pkg::*; #(
             commit_tmp_if.data.wb,
             commit_tmp_if.data.rd,
             commit_data_w,
-            `ifdef VECTOR_ENABLE
+            `ifdef EXT_V_ENABLE
                 commit_tmp_if.data.is_vec,
                 commit_vd_data_w,
                 commit_vdata_w,

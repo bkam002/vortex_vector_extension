@@ -77,7 +77,7 @@ import VX_fpu_pkg::*;
 
     reg [`XLEN-1:0] mscratch;
 
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
     reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vstart;
     reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vxsat;
     reg [`NUM_WARPS-1:0][`XLEN-1:0] csr_vxrm; 
@@ -157,7 +157,7 @@ import VX_fpu_pkg::*;
                     mscratch <= write_data;
                 end
                 //Vector CSR write
-                `ifdef VECTOR_ENABLE
+                `ifdef EXT_V_ENABLE
                     `VX_CSR_VSTART:   csr_vstart[write_wid]   <= write_data;
                     `VX_CSR_VXSAT:    csr_vxsat[write_wid]    <= write_data;
                     `VX_CSR_VXRM:     csr_vxrm[write_wid]     <= write_data;
@@ -221,7 +221,7 @@ import VX_fpu_pkg::*;
             `VX_CSR_MEPC,
             `VX_CSR_PMPCFG0,
             `VX_CSR_PMPADDR0 : read_data_ro_w = `XLEN'(0);
-            `ifdef VECTOR_ENABLE
+            `ifdef EXT_V_ENABLE
                 `VX_CSR_VSTART     : read_data_ro_w = csr_vstart[read_wid];
                 `VX_CSR_VXSAT      : read_data_ro_w = csr_vxsat[read_wid];  
                 `VX_CSR_VXRM       : read_data_ro_w = csr_vxrm[read_wid];  

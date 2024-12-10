@@ -20,7 +20,7 @@ module VX_pe_switch import VX_gpu_pkg::*; #(
     parameter RSP_OUT_BUF     = 0,
     parameter `STRING ARBITER = "R",
     parameter PE_SEL_BITS = `CLOG2(PE_COUNT),
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         parameter VLEN = `VLEN_ARCH
     `endif
 ) (
@@ -34,9 +34,9 @@ module VX_pe_switch import VX_gpu_pkg::*; #(
 );
     localparam PID_BITS    = `CLOG2(`NUM_THREADS / NUM_LANES);
     localparam PID_WIDTH   = `UP(PID_BITS);
-    localparam REQ_DATAW   = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + `INST_ALU_BITS + $bits(op_args_t) + 1 + `NR_BITS + `NT_WIDTH + (3 * NUM_LANES * `XLEN) + PID_WIDTH + 1 + 1;
     
-    `ifdef VECTOR_ENABLE
+    localparam REQ_DATAW   = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + `INST_ALU_BITS + $bits(op_args_t) + 1 + `NR_BITS + `NT_WIDTH + (3 * NUM_LANES * `XLEN) + PID_WIDTH + 1 + 1;
+    `ifdef EXT_V_ENABLE
         localparam RSP_DATAW        = `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + 1 + `NR_BITS + NUM_LANES * `XLEN + 1 + `NUM_THREADS * `VLEN_ARCH + `NUM_THREADS * VLEN + 
  PID_WIDTH + 1 + 1;
     `else

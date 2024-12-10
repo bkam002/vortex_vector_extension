@@ -22,9 +22,6 @@ interface VX_execute_if import VX_gpu_pkg::*; #(
         logic [`NW_WIDTH-1:0]           wid;
         logic [NUM_LANES-1:0]           tmask;
         logic [`PC_BITS-1:0]            PC;
-    `ifdef VECTOR_ENABLE
-        logic                           is_vec; 
-    `endif 
         logic [`INST_ALU_BITS-1:0]      op_type;
         op_args_t                       op_args;
         logic                           wb;

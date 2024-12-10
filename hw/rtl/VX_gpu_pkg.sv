@@ -128,7 +128,7 @@ package VX_gpu_pkg;
     } wctl_args_t;
 
     typedef struct packed {
-        logic [($bits(alu_args_t)-`VEC_TYPE_BITS+`XLEN+1)-1:0] __padding;
+        logic [($bits(alu_args_t)-`VEC_TYPE_BITS-`XLEN-1)-1:0] __padding;
         logic [`VEC_TYPE_BITS-1:0] vec_type;
         logic [`XLEN-1:0]          imm;
         logic                      use_imm;
@@ -332,7 +332,7 @@ package VX_gpu_pkg;
         `ifdef EXT_F_ENABLE
             `EX_FPU: `TRACE(level, ("FPU"))
         `endif
-        `ifdef VECTOR_ENABLE
+        `ifdef EXT_V_ENABLE
             `EX_VPU: `TRACE(level, ("VPU"))
         `endif
             default: `TRACE(level, ("?"))
@@ -700,7 +700,7 @@ package VX_gpu_pkg;
             endcase
         end
     `endif
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         `EX_VPU: begin
             `TRACE(level, ("VPU"));
         end

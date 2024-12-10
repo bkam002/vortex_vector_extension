@@ -15,7 +15,7 @@
 
 module VX_lsu_slice import VX_gpu_pkg::*; #(
     parameter `STRING INSTANCE_ID = "",
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         parameter VLEN = `VLEN_ARCH
     `endif
 ) (
@@ -39,7 +39,7 @@ module VX_lsu_slice import VX_gpu_pkg::*; #(
     localparam MEM_ASHIFT   = `CLOG2(`MEM_BLOCK_SIZE);
     localparam MEM_ADDRW    = `MEM_ADDR_WIDTH - MEM_ASHIFT;
 
-    `ifdef VECTOR_ENABLE
+    `ifdef EXT_V_ENABLE
         localparam RSP_ARB_DATAW= `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + `NR_BITS + 1 + NUM_LANES * `XLEN + 1 + `NUM_THREADS * `VLEN_ARCH + `NUM_THREADS * VLEN + PID_WIDTH + 1 + 1;
     `else
         localparam RSP_ARB_DATAW= `UUID_WIDTH + `NW_WIDTH + NUM_LANES + `PC_BITS + `NR_BITS + 1 + NUM_LANES * `XLEN + PID_WIDTH + 1 + 1;
