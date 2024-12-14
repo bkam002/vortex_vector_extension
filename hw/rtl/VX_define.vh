@@ -36,6 +36,8 @@
 
 `define NRI_BITS        `CLOG2(`NUM_IREGS)
 
+`define LANEID_BITS     `CLOG2(`VLEN / `ELEN)
+
 `ifdef EXT_F_ENABLE
 `define NUM_REGS        (2 * `NUM_IREGS)
 `else

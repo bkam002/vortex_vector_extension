@@ -28,7 +28,12 @@ module VX_commit import VX_gpu_pkg::*; #(
     VX_commit_sched_if.master commit_sched_if
 );
     `UNUSED_SPARAM (INSTANCE_ID)
+`ifdef EXT_V_ENABLE
+    localparam DATAW = `UUID_WIDTH + `NW_WIDTH + `NUM_THREADS + `PC_BITS + 1 + `NR_BITS + `NUM_THREADS * `XLEN + 1 + 1 + 1 + 1 + `NR_BITS + `LANEID_BITS + 1;
+`else
     localparam DATAW = `UUID_WIDTH + `NW_WIDTH + `NUM_THREADS + `PC_BITS + 1 + `NR_BITS + `NUM_THREADS * `XLEN + 1 + 1 + 1;
+`endif
+
     localparam COMMIT_SIZEW = `CLOG2(`NUM_THREADS + 1);
     localparam COMMIT_ALL_SIZEW = COMMIT_SIZEW + `ISSUE_WIDTH - 1;
 

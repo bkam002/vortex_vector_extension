@@ -32,7 +32,11 @@ module VX_scoreboard import VX_gpu_pkg::*; #(
     `UNUSED_SPARAM (INSTANCE_ID)
     localparam NUM_SRC_OPDS = 3;
     localparam NUM_OPDS = NUM_SRC_OPDS + 1;
+`ifdef EXT_V_ENABLE
+    localparam DATAW = `UUID_WIDTH + `NUM_THREADS + `PC_BITS + `EX_BITS + `INST_OP_BITS + `INST_ARGS_BITS + (`NR_BITS * 4) + 1 + 1 + (`NR_BITS * 3);
+`else
     localparam DATAW = `UUID_WIDTH + `NUM_THREADS + `PC_BITS + `EX_BITS + `INST_OP_BITS + `INST_ARGS_BITS + (`NR_BITS * 4) + 1;
+`endif
 
     VX_ibuffer_if staging_if [PER_ISSUE_WARPS]();
     reg [PER_ISSUE_WARPS-1:0] operands_ready;
@@ -261,7 +265,13 @@ module VX_scoreboard import VX_gpu_pkg::*; #(
             scoreboard_if.data.rd,
             scoreboard_if.data.rs1,
             scoreboard_if.data.rs2,
-            scoreboard_if.data.rs3
+            scoreboard_if.data.rs3,
+        `ifdef EXT_V_ENABLE
+            scoreboard_if.data.is_vec,
+            scoreboard_if.data.vd,
+            scoreboard_if.data.vs1,
+            scoreboard_if.data.vs2
+        `endif
         }),
         .valid_out (scoreboard_if.valid),
         .ready_out (scoreboard_if.ready),

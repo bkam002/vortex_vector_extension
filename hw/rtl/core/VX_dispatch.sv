@@ -30,7 +30,11 @@ module VX_dispatch import VX_gpu_pkg::*; #(
 );
     `UNUSED_SPARAM (INSTANCE_ID)
 
+`ifdef EXT_V_ENABLE
+    localparam DATAW = `UUID_WIDTH + ISSUE_WIS_W + `NUM_THREADS + `PC_BITS + `INST_OP_BITS + `INST_ARGS_BITS + 1 + `NR_BITS + (3 * `NUM_THREADS * `XLEN) + `NT_WIDTH + 1 + `NR_BITS + `LANEID_BITS + 1;
+`else
     localparam DATAW = `UUID_WIDTH + ISSUE_WIS_W + `NUM_THREADS + `PC_BITS + `INST_OP_BITS + `INST_ARGS_BITS + 1 + `NR_BITS + (3 * `NUM_THREADS * `XLEN) + `NT_WIDTH;
+`endif
 
     wire [`NUM_THREADS-1:0][`NT_WIDTH-1:0] tids;
     for (genvar i = 0; i < `NUM_THREADS; ++i) begin : g_tids
@@ -75,7 +79,13 @@ module VX_dispatch import VX_gpu_pkg::*; #(
                 last_active_tid,
                 operands_if.data.rs1_data,
                 operands_if.data.rs2_data,
-                operands_if.data.rs3_data
+                operands_if.data.rs3_data,
+            `ifdef EXT_V_ENABLE
+                operands_if.data.is_vec,
+                operands_if.data.vd,
+                operands_if.data.vd_lane_id,
+                operands_if.data.vd_is_last
+            `endif
             }),
             .data_out   (dispatch_if[i].data),
             .valid_out  (dispatch_if[i].valid),

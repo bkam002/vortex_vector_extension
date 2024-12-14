@@ -35,6 +35,14 @@ module VX_issue_slice import VX_gpu_pkg::*; #(
     VX_ibuffer_if ibuffer_if [PER_ISSUE_WARPS]();
     VX_scoreboard_if scoreboard_if();
     VX_operands_if operands_if();
+`ifdef EXT_V_ENABLE
+    VX_scoreboard_if vector_scoreboard_if();
+    VX_scoreboard_if scalar_scoreboard_if();
+
+    VX_operands_if scalar_operands_if();
+    VX_operands_if vector_operands_if();
+
+`endif
 
     VX_ibuffer #(
         .INSTANCE_ID (`SFORMATF(("%s-ibuffer", INSTANCE_ID)))
@@ -63,17 +71,45 @@ module VX_issue_slice import VX_gpu_pkg::*; #(
         .scoreboard_if  (scoreboard_if)
     );
 
-    VX_operands #(
+`ifdef EXT_V_ENABLE
+    VX_vpu_unit vpu (
+        .clk                (clk),
+        .reset              (reset),
+        .scoreboard_if      (scoreboard_if),
+        .vector_scoreboard_if (vector_scoreboard_if),
+        .scalar_scoreboard_if (scalar_scoreboard_if)
+    );
+
+    VX_vector_operands #(
         .INSTANCE_ID (`SFORMATF(("%s-operands", INSTANCE_ID)))
-    ) operands (
+    ) vector_operands (
         .clk            (clk),
         .reset          (reset),
      `ifdef PERF_ENABLE
         .perf_stalls    (issue_perf.opd_stalls),
      `endif
         .writeback_if   (writeback_if),
+        .scoreboard_if  (vector_scoreboard_if),
+        .operands_if    (vector_operands_if)
+    );
+`endif
+
+    VX_operands #(
+        .INSTANCE_ID (`SFORMATF(("%s-operands", INSTANCE_ID)))
+    ) operands (
+        .clk            (clk),
+        .reset          (reset),
+    `ifdef PERF_ENABLE
+        .perf_stalls    (issue_perf.opd_stalls),
+    `endif
+        .writeback_if   (writeback_if),
+    `ifdef EXT_V_ENABLE
+        .scoreboard_if  (scalar_scoreboard_if),
+        .operands_if    (scalar_operands_if)
+    `else
         .scoreboard_if  (scoreboard_if),
         .operands_if    (operands_if)
+    `endif
     );
 
     VX_dispatch #(

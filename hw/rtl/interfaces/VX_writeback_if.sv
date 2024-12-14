@@ -27,7 +27,9 @@ interface VX_writeback_if import VX_gpu_pkg::*; ();
     `ifdef EXT_V_ENABLE
         logic                           is_vec;
         logic [`NR_BITS-1:0]            vd;
-        logic [`NR_BITS-1:0]            lane_id;
+        logic [`LANEID_BITS-1:0]        vd_lane_id;
+        logic [`LANEID_BITS-1:0]        vd_is_last;
+    `endif
     } data_t;
 
     logic  valid;

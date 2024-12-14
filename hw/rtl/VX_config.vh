@@ -39,6 +39,10 @@
 `define EXT_F_ENABLE
 `endif
 
+`ifndef EXT_V_DISABLE
+`define EXT_V_ENABLE
+`endif
+
 `ifdef XLEN_64
 `ifndef FPU_DSP
 `ifndef EXT_D_DISABLE
@@ -87,6 +91,10 @@
 
 `ifndef VLEN
 `define VLEN 256
+`endif
+
+`ifndef ELEN
+`define ELEN 64
 `endif
 
 `ifndef NUM_CLUSTERS
